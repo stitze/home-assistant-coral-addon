@@ -1,6 +1,6 @@
 name: "Coral ML Inference"
 version: "0.1.0"
-slug: "coral_ml"
+slug: "coralml"
 description: "Runs TensorFlow Lite models on the Coral USB Accelerator"
 arch:
   - aarch64
