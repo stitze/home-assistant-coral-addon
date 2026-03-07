@@ -1,5 +1,6 @@
-ARG BUILD_FROM
+ARG BUILD_FROM=ghcr.io/home-assistant/{arch}-base:latest
 FROM $BUILD_FROM
+
 
 RUN apk add --no-cache \
     python3 \
