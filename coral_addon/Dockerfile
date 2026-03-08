@@ -6,13 +6,13 @@ RUN apt-get update && apt-get install -y \
     curl \
     python3 \
     python3-pip \
+    python3-numpy \
     libusb-1.0-0 \
     usbutils
 
 RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 
-# Installation via Paketmanager umgeht den pip-Versionskonflikt
 RUN apt-get update && \
     apt-get download libedgetpu1-max python3-tflite-runtime && \
     dpkg-deb -x libedgetpu1-max*.deb /tmp/coral && \
