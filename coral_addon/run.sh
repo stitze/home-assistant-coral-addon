@@ -12,28 +12,24 @@ fi
 
 cat > "${TEST_SCRIPT}" << 'PYEOF'
 import sys
-from ai_edge_litert.interpreter import Interpreter, load_delegate
+from pycoral.utils.edgetpu import make_interpreter
 
 print("--- Coral Stick Performance Test ---")
 
-interpreter = Interpreter(
-    model_path="/tmp/model.tflite",
-    experimental_delegates=[load_delegate("libedgetpu.so.1")]
-)
+interpreter = make_interpreter("/tmp/model.tflite")
 interpreter.allocate_tensors()
 print("SUCCESS: Coral Edge TPU is working correctly.")
 PYEOF
 
-# Attempt 1: device may not have firmware yet
+# Attempt 1 - device may still need firmware upload
 chmod -f a+rw /dev/bus/usb/*/* || true
 if python3 "${TEST_SCRIPT}"; then
     exec tail -f /dev/null
 fi
 
-# Attempt 2: libedgetpu uploaded firmware and the stick re-enumerated.
-# We must start a fresh Python process - reinitializing libedgetpu in the
-# same process causes a segfault.
-echo "INFO: First attempt failed, waiting for device re-enumeration..."
+# Attempt 2 - after firmware upload the stick re-enumerates; use a fresh
+# Python process (reinitializing libedgetpu in the same process segfaults)
+echo "INFO: Waiting for device re-enumeration..."
 sleep 3
 chmod -f a+rw /dev/bus/usb/*/* || true
 
@@ -41,5 +37,5 @@ if python3 "${TEST_SCRIPT}"; then
     exec tail -f /dev/null
 fi
 
-echo "FAILURE: Coral Edge TPU could not be initialized after re-enumeration."
+echo "FAILURE: Coral Edge TPU could not be initialized."
 exit 1

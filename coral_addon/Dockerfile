@@ -15,10 +15,12 @@ RUN apt-get update && \
     rm -rf /tmp/coral libedgetpu1-max*.deb && \
     ldconfig
 
-# tflite-runtime is broken on Python 3.11+ (missing _pywrap_tensorflow_interpreter_wrapper).
-# ai-edge-litert is Google's official replacement with full Edge TPU delegate support.
+# ai-edge-litert segfaults with libedgetpu 16.0.
+# pycoral bundles a tflite-runtime that is tested against libedgetpu.
 RUN find /usr/lib/python3/dist-packages -name "*tflite_runtime*" -exec rm -rf {} + && \
-    pip3 install --no-cache-dir --break-system-packages ai-edge-litert
+    pip3 install --no-cache-dir --break-system-packages \
+        --extra-index-url https://google-coral.github.io/py-repo/ \
+        pycoral
 
 COPY run.sh /
 RUN chmod a+x /run.sh
