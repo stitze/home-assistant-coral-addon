@@ -16,8 +16,7 @@ RUN pip3 install --break-system-packages \
     tflite-runtime==2.14.0
 
 RUN pip3 install --break-system-packages \
-    --extra-index-url https://google-coral.github.io/py-repo/ \
-    pycoral
+    https://github.com/feranick/pycoral/releases/download/v2.0.0.post1/pycoral-2.0.0.post1-cp311-cp311-linux_aarch64.whl
 
 COPY run.sh /
 RUN chmod a+x /run.sh
