@@ -12,11 +12,14 @@ fi
 
 cat > "${TEST_SCRIPT}" << 'PYEOF'
 import sys
-from pycoral.utils.edgetpu import make_interpreter
+from tflite_runtime.interpreter import Interpreter, load_delegate
 
 print("--- Coral Stick Performance Test ---")
 
-interpreter = make_interpreter("/tmp/model.tflite")
+interpreter = Interpreter(
+    model_path="/tmp/model.tflite",
+    experimental_delegates=[load_delegate("libedgetpu.so.1")]
+)
 interpreter.allocate_tensors()
 print("SUCCESS: Coral Edge TPU is working correctly.")
 PYEOF
@@ -27,8 +30,9 @@ if python3 "${TEST_SCRIPT}"; then
     exec tail -f /dev/null
 fi
 
-# Attempt 2 - after firmware upload the stick re-enumerates; use a fresh
-# Python process (reinitializing libedgetpu in the same process segfaults)
+# Attempt 2 - after firmware upload the stick re-enumerates with a new
+# device node; use a fresh Python process (reinitializing libedgetpu
+# in the same process segfaults)
 echo "INFO: Waiting for device re-enumeration..."
 sleep 3
 chmod -f a+rw /dev/bus/usb/*/* || true

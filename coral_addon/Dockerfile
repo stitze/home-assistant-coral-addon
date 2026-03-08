@@ -1,6 +1,5 @@
 FROM ghcr.io/home-assistant/aarch64-base-debian:bookworm
 
-# Install bash explicitly first so the run.sh shebang (#!/usr/bin/env bash) resolves correctly
 RUN apt-get update && apt-get install -y \
     bash gnupg2 ca-certificates curl python3 python3-pip python3-numpy libusb-1.0-0 usbutils
 
@@ -15,12 +14,9 @@ RUN apt-get update && \
     rm -rf /tmp/coral libedgetpu1-max*.deb && \
     ldconfig
 
-# ai-edge-litert segfaults with libedgetpu 16.0.
-# pycoral bundles a tflite-runtime that is tested against libedgetpu.
+# Remove broken system tflite_runtime, install 2.14.0 from PyPI (no version pin)
 RUN find /usr/lib/python3/dist-packages -name "*tflite_runtime*" -exec rm -rf {} + && \
-    pip3 install --no-cache-dir --break-system-packages \
-        --extra-index-url https://google-coral.github.io/py-repo/ \
-        pycoral
+    pip3 install --no-cache-dir --break-system-packages tflite-runtime
 
 COPY run.sh /
 RUN chmod a+x /run.sh
