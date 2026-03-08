@@ -20,4 +20,4 @@ RUN pip3 install --break-system-packages tflite-runtime==2.14.0
 COPY run.sh /
 RUN chmod a+x /run.sh
 
-CMD [ "/run.sh" ]
+ENTRYPOINT [ "/run.sh" ]
