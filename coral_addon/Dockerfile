@@ -5,15 +5,18 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
     python3 \
-    python3-pip
+    python3-pip \
+    libedgetpu1-std
 
 RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | \
     tee /etc/apt/sources.list.d/coral-edgetpu.list \
     && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 
-RUN apt-get update && apt-get install -y \
-    libedgetpu1-std \
-    python3-pycoral
+RUN apt-get update && apt-get install -y libedgetpu1-std
+
+RUN pip3 install --break-system-packages \
+    https://github.com/google-coral/pycoral/releases/download/v2.0.0/pycoral-2.0.0-cp311-cp311-linux_aarch64.whl \
+    tflite-runtime==2.5.0.post1
 
 COPY run.sh /
 RUN chmod a+x /run.sh
