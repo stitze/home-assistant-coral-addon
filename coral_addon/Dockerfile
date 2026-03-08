@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 
-# Nur die Hardware-Bibliothek manuell extrahieren
+# Nur die Hardware-Library extrahieren
 RUN apt-get update && \
     apt-get download libedgetpu1-max && \
     dpkg-deb -x libedgetpu1-max*.deb /tmp/coral && \
@@ -21,8 +21,8 @@ RUN apt-get update && \
     rm -rf /tmp/coral *.deb && \
     ldconfig
 
-# TFLite-Runtime ueber pip installieren (erledigt die internen Verknuepfungen sauber)
-RUN pip3 install --break-system-packages tflite-runtime
+# Pip-Installation erzwingen, um kaputte System-Pakete zu ueberschreiben
+RUN pip3 install --upgrade --break-system-packages tflite-runtime
 
 COPY run.sh /
 RUN chmod a+x /run.sh
