@@ -12,11 +12,13 @@ RUN apt-get update && apt-get install -y \
 RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 
+# Manueller Download und Entpacken ohne Installation (umgeht Error 30)
 RUN apt-get update && \
-    echo 'libedgetpu1-max libedgetpu/install-udev-rules boolean false' | debconf-set-selections && \
-    apt-get install -y libedgetpu1-max
-
-RUN ln -s /usr/lib/aarch64-linux-gnu/libedgetpu.so.1.0 /usr/lib/libedgetpu.so.1 && ldconfig
+    apt-get download libedgetpu1-max && \
+    dpkg-deb -x libedgetpu1-max*.deb /tmp/coral && \
+    cp /tmp/coral/usr/lib/aarch64-linux-gnu/libedgetpu.so.1.0 /usr/lib/libedgetpu.so.1 && \
+    rm -rf /tmp/coral *.deb && \
+    ldconfig
 
 RUN pip3 install --break-system-packages tflite-runtime==2.14.0
 
