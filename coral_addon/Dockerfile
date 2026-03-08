@@ -1,12 +1,20 @@
 FROM ghcr.io/home-assistant/aarch64-base-debian:bookworm
 
+# 1. System-Basics ohne Schnickschnack
 RUN apt-get update && apt-get install -y \
-    gnupg2 ca-certificates curl python3 python3-pip libusb-1.0-0
+    gnupg2 \
+    ca-certificates \
+    curl \
+    python3 \
+    python3-pip \
+    libusb-1.0-0
 
+# 2. Offizielle Google Coral Treiber (Hardware-Ebene)
 RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
     apt-get update && apt-get install -y libedgetpu1-std
 
+# 3. Nur die Runtime (Funktioniert sofort mit Python 3.11)
 RUN pip3 install --break-system-packages tflite-runtime==2.14.0
 
 COPY run.sh /
