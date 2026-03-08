@@ -13,6 +13,9 @@ RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" |
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
     apt-get update && apt-get install -y libedgetpu1-std
 
+# Aktualisiert die Library-Pfade
+RUN ldconfig
+
 RUN pip3 install --break-system-packages tflite-runtime==2.14.0
 
 COPY run.sh /
