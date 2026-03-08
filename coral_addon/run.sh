@@ -2,7 +2,7 @@
 # Bail out immediately on any unhandled error
 set -euo pipefail
 
-MODEL_URL="https://raw.githubusercontent.com/google-coral/test-data/master/mobilenet_v2_1.0_224_inat_bird_device_solution_edgetpu.tflite"
+MODEL_URL="https://raw.githubusercontent.com/google-coral/test_data/master/mobilenet_v2_1.0_224_inat_bird_quant_edgetpu.tflite"
 MODEL_PATH="/tmp/model.tflite"
 TEST_SCRIPT="/tmp/test_coral.py"
 
