@@ -8,9 +8,9 @@
   "boot": "auto",
   "host_network": true,
   "apparmor": false,
-  "privileged": ["SYS_RAWIO", "SYS_ADMIN"],
+  "full_access": true,
   "devices": ["/dev/bus/usb:/dev/bus/usb"],
   "map": ["config:rw"],
   "options": {},
   "schema": {}
-}                                                                                                                 
+}
