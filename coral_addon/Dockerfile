@@ -5,8 +5,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
     python3 \
-    python3-pip \
-    lsb-release
+    python3-pip
 
 RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | \
     tee /etc/apt/sources.list.d/coral-edgetpu.list \
