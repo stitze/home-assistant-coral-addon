@@ -10,50 +10,36 @@ if [ ! -f "${MODEL_PATH}" ]; then
     curl -fsSL "${MODEL_URL}" -o "${MODEL_PATH}"
 fi
 
-# Set USB permissions before AND after the Coral firmware upload.
-# On first access libedgetpu uploads firmware and the stick re-enumerates
-# with a new device ID (1a6e:089a -> 18d1:9302), creating a new device node
-# that also needs rw permissions.
-chmod -f a+rw /dev/bus/usb/*/* || true
-
 cat > "${TEST_SCRIPT}" << 'PYEOF'
-import sys, time, subprocess
-
+import sys
 from ai_edge_litert.interpreter import Interpreter, load_delegate
 
 print("--- Coral Stick Performance Test ---")
 
-# First attempt - may trigger firmware upload and re-enumeration
-try:
-    interpreter = Interpreter(
-        model_path="/tmp/model.tflite",
-        experimental_delegates=[load_delegate("libedgetpu.so.1")]
-    )
-    interpreter.allocate_tensors()
-    print("SUCCESS: Coral Edge TPU is working correctly.")
-    sys.exit(0)
-except Exception:
-    pass
-
-# Device re-enumerated after firmware upload - fix permissions and retry
-print("INFO: Device re-enumerated, fixing permissions and retrying...")
-subprocess.run(["chmod", "-f", "a+rw"] + 
-    __import__('glob').glob("/dev/bus/usb/*/*"), 
-    capture_output=True)
-time.sleep(2)
-
-try:
-    interpreter = Interpreter(
-        model_path="/tmp/model.tflite",
-        experimental_delegates=[load_delegate("libedgetpu.so.1")]
-    )
-    interpreter.allocate_tensors()
-    print("SUCCESS: Coral Edge TPU is working correctly.")
-except Exception as e:
-    print(f"FAILURE: {e}")
-    sys.exit(1)
+interpreter = Interpreter(
+    model_path="/tmp/model.tflite",
+    experimental_delegates=[load_delegate("libedgetpu.so.1")]
+)
+interpreter.allocate_tensors()
+print("SUCCESS: Coral Edge TPU is working correctly.")
 PYEOF
 
-python3 "${TEST_SCRIPT}"
+# Attempt 1: device may not have firmware yet
+chmod -f a+rw /dev/bus/usb/*/* || true
+if python3 "${TEST_SCRIPT}"; then
+    exec tail -f /dev/null
+fi
 
-exec tail -f /dev/null
+# Attempt 2: libedgetpu uploaded firmware and the stick re-enumerated.
+# We must start a fresh Python process - reinitializing libedgetpu in the
+# same process causes a segfault.
+echo "INFO: First attempt failed, waiting for device re-enumeration..."
+sleep 3
+chmod -f a+rw /dev/bus/usb/*/* || true
+
+if python3 "${TEST_SCRIPT}"; then
+    exec tail -f /dev/null
+fi
+
+echo "FAILURE: Coral Edge TPU could not be initialized after re-enumeration."
+exit 1
