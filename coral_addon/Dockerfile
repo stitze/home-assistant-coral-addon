@@ -6,8 +6,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     python3 \
     python3-pip \
-    libusb-1.0-0-dev \
-    usbutils
+    libusb-1.0-0 \
+    usbutils \
+    libext2fs2
 
 RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
@@ -15,8 +16,7 @@ RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" |
 RUN apt-get update && \
     apt-get download libedgetpu1-max && \
     dpkg-deb -x libedgetpu1-max*.deb /tmp/coral && \
-    cp /tmp/coral/usr/lib/aarch64-linux-gnu/libedgetpu.so.1.0 /usr/lib/libedgetpu.so.1 && \
-    ln -s /usr/lib/libedgetpu.so.1 /usr/lib/libedgetpu.so.1.0 && \
+    cp -r /tmp/coral/* / && \
     rm -rf /tmp/coral *.deb && \
     ldconfig
 

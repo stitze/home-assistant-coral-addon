@@ -1,6 +1,6 @@
 {
   "name": "Home Assistant Coral Add-on",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "slug": "coral_addon",
   "description": "Integration for Google Coral Edge TPU",
   "arch": ["aarch64", "amd64"],
