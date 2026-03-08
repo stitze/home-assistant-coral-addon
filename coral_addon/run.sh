@@ -1,29 +1,18 @@
-#!/usr/bin/with-contenv bashio
+#!/usr/bin/env bash
+set -e
 
-bashio::log.info "Starting Home Assistant Coral Add-on..."
+echo "--- Coral Stick Hardware Test ---"
 
-# Check for USB device
-if lsusb | grep -q "Google Inc."; then
-    bashio::log.info "Google Coral USB Accelerator found on USB bus."
+# Hardware Check
+if lsusb | grep -qi "Google"; then
+    echo "Hardware found!"
 else
-    bashio::log.error "Google Coral USB Accelerator NOT detected. Check connection!"
+    echo "Hardware not found! Please check the USB connection."
 fi
 
-# Simple Python check for Edge TPU availability
-python3 << EOF
-import os
-from pycoral.utils import edgetpu
+# Software Check
+python3 -c "import tflite_runtime.interpreter as tflite; print('Software Check: TFLite Runtime successfully loaded!')"
 
-try:
-    devices = edgetpu.list_edge_tpus()
-    if devices:
-        print(f"SUCCESS: Edge TPU detected: {devices}")
-    else:
-        print("FAILURE: No Edge TPU devices found by pycoral.")
-except Exception as e:
-    print(f"ERROR: Could not initialize pycoral: {e}")
-EOF
-
-bashio::log.info "Hardware check complete. Keeping container running..."
-
-while true; do sleep 60; done
+# Keep the container running
+echo "--- Test finished. Add-on remains active. ---"
+exec tail -f /dev/null
