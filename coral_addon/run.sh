@@ -10,22 +10,19 @@ else
     exit 1
 fi
 
-echo "Downloading test model and image..."
+echo "Downloading test model..."
 curl -sL https://raw.githubusercontent.com/google-coral/test-data/master/mobilenet_v2_1.0_224_inat_bird_device_solution_edgetpu.tflite -o /tmp/model.tflite
 
 echo "Starting inference test..."
 python3 << END
 import time
-import os
 from tflite_runtime.interpreter import Interpreter, load_delegate
 
-# Try to find the library path
-lib_path = "libedgetpu.so.1"
-
 try:
+    # Attempting to load the delegate
     interpreter = Interpreter(
         model_path="/tmp/model.tflite",
-        experimental_delegates=[load_delegate(lib_path)]
+        experimental_delegates=[load_delegate("libedgetpu.so.1")]
     )
     interpreter.allocate_tensors()
     print("Edge TPU Delegate successfully loaded!")
