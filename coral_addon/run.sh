@@ -18,19 +18,26 @@ python3 << END
 import time
 from tflite_runtime.interpreter import Interpreter, load_delegate
 
+# Absolute path to the library
+LIB_PATH = "/usr/lib/libedgetpu.so.1"
+
 try:
-    # Attempting to load the delegate
     interpreter = Interpreter(
         model_path="/tmp/model.tflite",
-        experimental_delegates=[load_delegate("libedgetpu.so.1")]
+        experimental_delegates=[load_delegate(LIB_PATH)]
     )
     interpreter.allocate_tensors()
     print("Edge TPU Delegate successfully loaded!")
 
-    start = time.perf_counter()
-    interpreter.invoke()
-    end = time.perf_counter()
-    print(f"Inference speed: {(end - start) * 1000:.2f} ms")
+    # Run 10 iterations to get a stable average
+    latencies = []
+    for _ in range(10):
+        start = time.perf_counter()
+        interpreter.invoke()
+        latencies.append(time.perf_counter() - start)
+    
+    avg_ms = (sum(latencies) / len(latencies)) * 1000
+    print(f"Average Inference speed: {avg_ms:.2f} ms")
 
 except Exception as e:
     print(f"Error during inference: {e}")
