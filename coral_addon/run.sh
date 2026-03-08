@@ -10,15 +10,37 @@ if [ ! -f "${MODEL_PATH}" ]; then
     curl -fsSL "${MODEL_URL}" -o "${MODEL_PATH}"
 fi
 
-# The Edge TPU delegate needs rw access to the USB device node.
-# udev rules don't run inside Docker, so we set permissions manually.
+# Set USB permissions before AND after the Coral firmware upload.
+# On first access libedgetpu uploads firmware and the stick re-enumerates
+# with a new device ID (1a6e:089a -> 18d1:9302), creating a new device node
+# that also needs rw permissions.
 chmod -f a+rw /dev/bus/usb/*/* || true
 
 cat > "${TEST_SCRIPT}" << 'PYEOF'
-import sys
+import sys, time, subprocess
+
 from ai_edge_litert.interpreter import Interpreter, load_delegate
 
 print("--- Coral Stick Performance Test ---")
+
+# First attempt - may trigger firmware upload and re-enumeration
+try:
+    interpreter = Interpreter(
+        model_path="/tmp/model.tflite",
+        experimental_delegates=[load_delegate("libedgetpu.so.1")]
+    )
+    interpreter.allocate_tensors()
+    print("SUCCESS: Coral Edge TPU is working correctly.")
+    sys.exit(0)
+except Exception:
+    pass
+
+# Device re-enumerated after firmware upload - fix permissions and retry
+print("INFO: Device re-enumerated, fixing permissions and retrying...")
+subprocess.run(["chmod", "-f", "a+rw"] + 
+    __import__('glob').glob("/dev/bus/usb/*/*"), 
+    capture_output=True)
+time.sleep(2)
 
 try:
     interpreter = Interpreter(
